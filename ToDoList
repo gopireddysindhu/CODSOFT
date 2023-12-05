@@ -1,0 +1,76 @@
+import json
+import os
+from datetime import datetime
+
+class Task:
+    def _init_(self, name, description, due_date=None, completed=False):
+        self.name = name
+        self.description = description
+        self.due_date = due_date
+        self.completed = completed
+
+class ToDoList:
+    def _init_(self, tasks=None):
+        self.tasks = tasks or []
+
+    def add_task(self, task):
+        self.tasks.append(task)
+
+    def update_task(self, task_name, new_description, new_due_date):
+        for task in self.tasks:
+            if task.name == task_name:
+                task.description = new_description
+                task.due_date = new_due_date
+                break
+
+    def mark_complete(self, task_name):
+        for task in self.tasks:
+            if task.name == task_name:
+                task.completed = True
+                break
+
+    def display_tasks(self):
+        for task in self.tasks:
+            print(f"{task.name} - {task.description} - Due: {task.due_date} - Completed: {task.completed}")
+
+def save_to_file(todo_list, filename="tasks.json"):
+    tasks_data = [{"name": task.name, "description": task.description,
+                   "due_date": task.due_date, "completed": task.completed} for task in todo_list.tasks]
+
+    with open(filename, 'w') as file:
+        json.dump(tasks_data, file)
+
+def load_from_file(filename="tasks.json"):
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            tasks_data = json.load(file)
+
+        tasks = [Task(**task_data) for task_data in tasks_data]
+        return ToDoList(tasks)
+    else:
+        return ToDoList()
+
+# Example Usage
+def main():
+    todo_list = load_from_file()
+
+    # Add tasks
+    task1 = Task("Task 1", "Description for Task 1", "2023-01-01")
+    task2 = Task("Task 2", "Description for Task 2", "2023-02-01")
+    todo_list.add_task(task1)
+    todo_list.add_task(task2)
+
+    # Update tasks
+    todo_list.update_task("Task 1", "Updated description", "2023-03-01")
+
+    # Mark task as complete
+    todo_list.mark_complete("Task 2")
+
+    # Display tasks
+    todo_list.display_tasks()
+
+    # Save tasks to file
+    save_to_file(todo_list)
+
+if _name_ == "_main_":
+    main()
